@@ -1,6 +1,8 @@
 version: 2
 updates:
-  # actions/checkout, upload-artifact, download-artifact and action-gh-release
+  # actions/checkout, upload-artifact, download-artifact and action-gh-release.
+  # The yabadabadoo submodule is not here: Dependabot proposes upstream's latest commit, not a
+  # release tag, so .github/workflows/upstream.yml follows upstream's releases instead.
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -9,10 +11,3 @@ updates:
       actions:
         patterns:
           - "*"
-
-  # The yabadabadoo submodule. Dependabot proposes the latest commit of upstream's main branch,
-  # not a tag: check that it is a release before merging, or check out the release tag instead.
-  - package-ecosystem: gitsubmodule
-    directory: /
-    schedule:
-      interval: weekly

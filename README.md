@@ -90,17 +90,19 @@ Pak Store は `<repo_url>/releases/download/<version>/<release_filename>` から
 
 ### 上流の更新
 
-上流の新しいリリースに追従するには、サブモジュールを更新してコミットし、`pak.json` の `version` を
-`v<新しいバージョン>.1` にします。
+`.github/workflows/upstream.yml` が毎日上流のタグを確認し、新しい正式リリース（ベータは対象外）が出ていれば、
+サブモジュールをそのタグに更新して `pak.json` の `version` を `v<新しいバージョン>.1` にした PR を作ります。
+PR の CI が通ったらマージし、PR に書かれたタグを push すればリリースされます。一度作った PR を閉じた場合、
+同じリリースの PR は作り直しません（ブランチ `upstream/<タグ>` が残っている間）。
 
-    git -C yabadabadoo fetch --tags
-    git -C yabadabadoo checkout <新しいタグ>
-    git add yabadabadoo
-    git commit -m "Update Yabadabadoo to <新しいタグ>"
+Actions の画面から手動で実行することもでき、その場合は更新先のタグを指定できます。利用には
+リポジトリ設定の Actions > General で「Allow GitHub Actions to create and approve pull requests」を有効にしてください。
 
-Dependabot（`.github/dependabot.yml`）も毎週サブモジュールの更新 PR を作りますが、提案されるのは上流 `main` の
-最新コミットでリリースタグとは限りません。その場合は PR を使わず、上の手順でリリースタグに合わせてください
-（タグ以外を指したままだとリリースジョブが失敗します）。
+手元で同じ更新をするには次のようにします（引数を省くと最新のリリース）。
+
+    scripts/update-upstream.sh v0.4
+    git add yabadabadoo pak.json
+    git commit -m "Update Yabadabadoo to v0.4"
 
 ### Pak Store への登録
 

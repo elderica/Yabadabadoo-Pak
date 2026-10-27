@@ -20,10 +20,7 @@ version=$(jq -r .version pak.json)
 
 upstream_tag=$(git -C yabadabadoo describe --tags --exact-match HEAD 2>/dev/null) ||
 	fail "the yabadabadoo submodule is not checked out at a release tag"
-upstream=$(echo "${upstream_tag#v}" | awk -F. '
-	NF > 3 { exit 1 }
-	{ for (i = 1; i <= NF; i++) if ($i !~ /^[0-9]+$/) exit 1 }
-	{ printf "%s.%s.%s", $1, (NF > 1 ? $2 : 0), (NF > 2 ? $3 : 0) }') ||
+upstream=$(scripts/upstream-version.sh "$upstream_tag") ||
 	fail "the yabadabadoo submodule is at $upstream_tag, which is not a release version"
 
 case $tag in

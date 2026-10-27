@@ -1,0 +1,71 @@
+name: Upstream release
+
+# Opens a pull request when Yabadabadoo publishes a new release (not a beta): the submodule moves
+# to the release tag and pak.json's version becomes v<upstream>.1. Merge it, then push that tag.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Upstream release tag to update to (default the newest)
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    name: Check for a new upstream release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Update the submodule and pak.json
+        id: update
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          version=$(scripts/update-upstream.sh ${TAG:+"$TAG"})
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ -n "$version" ]; then
+            echo "tag=$(git -C yabadabadoo describe --tags --exact-match HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open a pull request
+        if: steps.update.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.update.outputs.tag }}
+          VERSION: ${{ steps.update.outputs.version }}
+        run: |
+          branch="upstream/$TAG"
+          # Once opened, a closed pull request is not opened again
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "$branch already exists"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --create "$branch"
+          git add yabadabadoo pak.json
+          git commit --message "Update Yabadabadoo to $TAG"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Update Yabadabadoo to $TAG ($VERSION)" \
+            --body "Yabadabadoo $TAG: https://github.com/ProRapSuperstarOriginalMaster/Yabadabadoo/releases/tag/$TAG
+
+          After merging, release it with:
+
+              git tag $VERSION
+              git push origin $VERSION"
+          # A pull request opened with GITHUB_TOKEN starts no workflows, but workflow_dispatch does
+          gh workflow run build.yml --ref "$branch"
