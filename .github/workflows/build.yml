@@ -83,15 +83,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
+        with:
+          submodules: true
+          fetch-depth: 0
 
-      # Pak Store downloads <repo_url>/releases/download/<version>/<release_filename>
-      - name: Check that the tag matches pak.json
-        run: |
-          version=$(jq -r .version pak.json)
-          if [ "$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error file=pak.json::version is $version but the tag is $GITHUB_REF_NAME"
-            exit 1
-          fi
+      - name: Check the tag against pak.json and the submodule
+        run: scripts/check-version.sh "$GITHUB_REF_NAME"
 
       - name: Download pak
         uses: actions/download-artifact@v8.0.2
