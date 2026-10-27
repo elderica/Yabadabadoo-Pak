@@ -1,0 +1,20 @@
+{
+  "name": "SATURN",
+  "version": "v0.1.0",
+  "type": "EMU",
+  "description": "Sega Saturn emulator using the Yabadabadoo libretro core (a Yabause fork). Requires a Saturn BIOS in Bios/SATURN.",
+  "author": "elderica",
+  "repo_url": "https://github.com/elderica/Yabadabadoo-Pak",
+  "release_filename": "SATURN.pakz",
+  "changelog": {
+    "v0.1.0": "Initial release with Yabadabadoo v0.3."
+  },
+  "categories": [
+    "Emulators"
+  ],
+  "platforms": [
+    "tg5040",
+    "tg5050",
+    "h700"
+  ]
+}

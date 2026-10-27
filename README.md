@@ -10,7 +10,7 @@ Packages the Yabadabadoo Sega Saturn libretro core as a NextUI emulator pak (`SA
 
 [Releases](../../releases) から次のどちらかをダウンロードします。
 
-- `Yabadabadoo.pakz` — SD カードのルートに置いて再起動すると、NextUI が起動時に自動で展開します。
+- `SATURN.pakz` — SD カードのルートに置いて再起動すると、NextUI が起動時に自動で展開します。
 - `Yabadabadoo-<version>.zip` — SD カードのルートに展開します。
 
 どちらも以下を追加します（3 プラットフォーム分すべて入っています）。
@@ -65,8 +65,19 @@ GitHub Actions（`.github/workflows/build.yml`）が push と pull request の�
 パッケージを Actions の成果物としてアップロードします。`v` で始まるタグを push するとリリースページに
 `.zip` と `.pakz` が公開されます。
 
-    git tag v0.3-1
-    git push origin v0.3-1
+タグは `pak.json` の `version` と完全に一致させてください（一致しないとリリースジョブが失敗します）。
+Pak Store は `<repo_url>/releases/download/<version>/<release_filename>` からダウンロードするためです。
+リリースのたびに `pak.json` の `version` と `changelog` を更新し、`main` にマージしてからタグを打ちます。
+
+    git tag v0.1.0
+    git push origin v0.1.0
+
+### Pak Store への登録
+
+`pak.json`（Pak Store 用のメタデータ）は `main` ブランチのルートにある必要があります。最初のリリースを公開したら、
+[Pak Store の申請フォーム](https://github.com/LoveRetro/nextui-pak-store/issues/new?template=new-pak-submission.yml)
+から、表示名・リポジトリ URL・カテゴリ（Emulators）を添えて申請します。Pak Store からは `SATURN.pakz` が
+SD カードのルートに展開されます。
 
 上流の新しいバージョンに追従するには、サブモジュールを更新してコミットします。
 

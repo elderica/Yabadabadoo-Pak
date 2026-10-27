@@ -67,7 +67,7 @@ package:
 	mkdir -p "build/package/Bios/$(PAK_TAG)" "build/package/Roms/$(ROMS_DIR)"
 	touch "build/package/Bios/$(PAK_TAG)/.keep" "build/package/Roms/$(ROMS_DIR)/.keep"
 	cd build/package && zip -qrX ../../dist/$(PAK_NAME)-$(RELEASE_VERSION).zip Emus Bios Roms
-	cp dist/$(PAK_NAME)-$(RELEASE_VERSION).zip dist/$(PAK_NAME).pakz
+	cp dist/$(PAK_NAME)-$(RELEASE_VERSION).zip dist/$(PAK_TAG).pakz
 	@ls -l dist
 
 clean:
