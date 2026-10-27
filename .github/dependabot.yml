@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # actions/checkout, upload-artifact, download-artifact and action-gh-release
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  # The yabadabadoo submodule. Dependabot proposes the latest commit of upstream's main branch,
+  # not a tag: check that it is a release before merging, or check out the release tag instead.
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: weekly
