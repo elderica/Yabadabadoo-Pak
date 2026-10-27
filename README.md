@@ -65,12 +65,42 @@ GitHub Actions（`.github/workflows/build.yml`）が push と pull request の�
 パッケージを Actions の成果物としてアップロードします。`v` で始まるタグを push するとリリースページに
 `.zip` と `.pakz` が公開されます。
 
-タグは `pak.json` の `version` と完全に一致させてください（一致しないとリリースジョブが失敗します）。
-Pak Store は `<repo_url>/releases/download/<version>/<release_filename>` からダウンロードするためです。
-リリースのたびに `pak.json` の `version` と `changelog` を更新し、`main` にマージしてからタグを打ちます。
+### バージョンとタグ
 
-    git tag v0.1.0
-    git push origin v0.1.0
+タグは AUR の `pkgver-pkgrel` にならい、`v<上流のバージョン>.<リリース番号>` とします。
+
+- `<上流のバージョン>`: サブモジュールが指す上流のリリースタグを 3 桁にそろえたもの（`v0.3` → `0.3.0`、`v0.2.1` → `0.2.1`）
+- `<リリース番号>`: 同じ上流バージョンでの Pak のリリース回数（1 から。上流が上がったら 1 に戻す）
+
+例: `v0.3.0.1` → （Pak 側の修正）`v0.3.0.2` → （上流 0.4 に更新）`v0.4.0.1`
+
+AUR と違い `-` ではなく `.` で区切るのは、Pak Store がバージョンを `.` 区切りの数値として比較するためです
+（`0.3-1` は正しく比較されず、利用者に更新が通知されません）。
+
+リリースのたびに `pak.json` の `version` と `changelog` を更新し、`main` にマージしてからタグを打ちます。
+Pak Store は `<repo_url>/releases/download/<version>/<release_filename>` からダウンロードするので、
+タグは `pak.json` の `version` と完全に一致している必要があります。
+
+    git tag v0.3.0.1
+    git push origin v0.3.0.1
+
+リリースジョブは最初に `scripts/check-version.sh <タグ>` で、タグが `pak.json` の `version` と一致すること、
+サブモジュールが上流のリリースタグ（ベータ版でないもの）を指していて、タグがそのバージョンで始まることを確認します。
+タグを打つ前に手元で同じ確認ができます。
+
+### 上流の更新
+
+上流の新しいリリースに追従するには、サブモジュールを更新してコミットし、`pak.json` の `version` を
+`v<新しいバージョン>.1` にします。
+
+    git -C yabadabadoo fetch --tags
+    git -C yabadabadoo checkout <新しいタグ>
+    git add yabadabadoo
+    git commit -m "Update Yabadabadoo to <新しいタグ>"
+
+Dependabot（`.github/dependabot.yml`）も毎週サブモジュールの更新 PR を作りますが、提案されるのは上流 `main` の
+最新コミットでリリースタグとは限りません。その場合は PR を使わず、上の手順でリリースタグに合わせてください
+（タグ以外を指したままだとリリースジョブが失敗します）。
 
 ### Pak Store への登録
 
@@ -78,13 +108,6 @@ Pak Store は `<repo_url>/releases/download/<version>/<release_filename>` から
 [Pak Store の申請フォーム](https://github.com/LoveRetro/nextui-pak-store/issues/new?template=new-pak-submission.yml)
 から、表示名・リポジトリ URL・カテゴリ（Emulators）を添えて申請します。Pak Store からは `SATURN.pakz` が
 SD カードのルートに展開されます。
-
-上流の新しいバージョンに追従するには、サブモジュールを更新してコミットします。
-
-    git -C yabadabadoo fetch --tags
-    git -C yabadabadoo checkout <新しいタグ>
-    git add yabadabadoo
-    git commit -m "Update Yabadabadoo to <新しいタグ>"
 
 ## ライセンス
 
