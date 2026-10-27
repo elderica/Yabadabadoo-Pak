@@ -1,0 +1,26 @@
+diff --git a/yabause/src/libretro/libretro.c b/yabause/src/libretro/libretro.c
+index 012f897e6..f068d52e8 100644
+--- a/yabause/src/libretro/libretro.c
++++ b/yabause/src/libretro/libretro.c
+@@ -1300,8 +1300,21 @@ static bool disk_replace_image_index(unsigned index, const struct retro_game_inf
+    }
+    else
+    {
++      /* Frontends like NextUI's minarch swap discs by replacing the image in
++       * the closed tray, without ejecting first: open and close the tray
++       * around it so the new disc is actually read. */
++      bool swap = !disk_tray_open && !no_bios_screen && index == disk_index &&
++                  info->path && strcmp(disk_paths[index], info->path) != 0;
++
+       snprintf(disk_paths[index], sizeof(disk_paths[index]), "%s", info->path);
+       fill_pathname(disk_labels[index], path_basename(disk_paths[index]), "", sizeof(disk_labels[index]));
++
++      if (swap)
++      {
++         Cs2ForceOpenTray();
++         if (Cs2ForceCloseTray(CDCORE_ISO, disk_paths[index]) != 0)
++            return false;
++      }
+    }
+ 
+    return true;
